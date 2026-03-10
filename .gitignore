@@ -1,0 +1,9 @@
+mirokai.db
+uploads/
+!uploads/.gitkeep
+.env
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
