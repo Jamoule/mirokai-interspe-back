@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS modules (
     media_type TEXT,
     media_url TEXT,
     image_urls TEXT DEFAULT '[]',
+    transcript_segments TEXT DEFAULT '[]',
     qr_code TEXT UNIQUE NOT NULL,
     position_x REAL DEFAULT 0.0,
     position_y REAL DEFAULT 0.0,

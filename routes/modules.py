@@ -13,6 +13,11 @@ def module_to_dict(row):
             d["image_urls"] = json.loads(d["image_urls"])
         except Exception:
             d["image_urls"] = []
+    if isinstance(d.get("transcript_segments"), str):
+        try:
+            d["transcript_segments"] = json.loads(d["transcript_segments"])
+        except Exception:
+            d["transcript_segments"] = []
     d["has_quiz"] = bool(d.get("has_quiz"))
     d["is_active"] = bool(d.get("is_active"))
     return d
@@ -79,15 +84,16 @@ def create_module():
 
     module_id = generate_id()
     image_urls = json.dumps(data.get("image_urls", []))
+    transcript_segments = json.dumps(data.get("transcript_segments", []))
 
     conn.execute(
         """INSERT INTO modules (id, number, name, description, media_type, media_url, image_urls,
-           qr_code, position_x, position_y, has_quiz, is_active, suggested_order)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           transcript_segments, qr_code, position_x, position_y, has_quiz, is_active, suggested_order)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             module_id, data["number"], data["name"],
             data.get("description"), data.get("media_type"), data.get("media_url"),
-            image_urls, data["qr_code"],
+            image_urls, transcript_segments, data["qr_code"],
             data.get("position_x", 0.0), data.get("position_y", 0.0),
             1 if data.get("has_quiz") else 0,
             1 if data.get("is_active", True) else 0,
@@ -141,6 +147,10 @@ def update_module(module_id):
     if "image_urls" in data:
         updates.append("image_urls = ?")
         values.append(json.dumps(data["image_urls"]))
+
+    if "transcript_segments" in data:
+        updates.append("transcript_segments = ?")
+        values.append(json.dumps(data["transcript_segments"]))
 
     updates.append("updated_at = datetime('now')")
     values.append(module_id)
