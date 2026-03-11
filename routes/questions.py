@@ -4,7 +4,7 @@ from middleware.auth import admin_required
 
 questions_bp = Blueprint("questions", __name__)
 
-VALID_AGE_GROUPS = {"3-4", "5-7", "8-10", "parents"}
+VALID_AGE_GROUPS = {"5-7", "8-10", "11-13", "14+"}
 
 def question_with_answers(conn, question_id, include_secret=False):
     q = conn.execute("SELECT * FROM questions WHERE id = ?", (question_id,)).fetchone()
@@ -29,15 +29,18 @@ def get_questions(module_id):
         conn.close()
         return jsonify({"error": "Module introuvable"}), 404
 
-    if age_group:
-        rows = conn.execute(
-            "SELECT id FROM questions WHERE module_id = ? AND age_group = ? ORDER BY display_order",
-            (module_id, age_group)
-        ).fetchall()
-    else:
-        rows = conn.execute(
-            "SELECT id FROM questions WHERE module_id = ? ORDER BY display_order", (module_id,)
-        ).fetchall()
+    if not age_group:
+        conn.close()
+        return jsonify({"error": "age_group requis"}), 400
+
+    if age_group not in VALID_AGE_GROUPS:
+        conn.close()
+        return jsonify({"error": f"age_group invalide. Valeurs: {', '.join(VALID_AGE_GROUPS)}"}), 400
+
+    rows = conn.execute(
+        "SELECT id FROM questions WHERE module_id = ? AND age_group = ? ORDER BY display_order",
+        (module_id, age_group)
+    ).fetchall()
 
     questions = [question_with_answers(conn, r["id"], include_secret=False) for r in rows]
     conn.close()

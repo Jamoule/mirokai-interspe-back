@@ -1,274 +1,90 @@
-# Mirokai API
+# Mirokai API — Back-end
 
-API back-end du parcours Mirokai. Construite avec Flask + SQLite + JWT. Les médias sont stockés localement.
+API back-end du parcours Mirokai, construite avec **Flask**, **SQLite** et **JWT**. Ce projet gère les modules, les quiz et l'administration du parcours.
 
 ---
 
 ## Prérequis
 
+Avant de commencer, assurez-vous d'avoir installé :
+
 | Outil | Version minimale | Vérification |
 |---|---|---|
-| Python | 3.10+ | `python3 --version` |
-| pip | inclus avec Python | `pip3 --version` |
+| **Python** | 3.10+ | `python3 --version` |
+| **pip** | Inclus avec Python | `pip3 --version` |
 
-> Aucune base de données externe requise — SQLite est intégré à Python.
+*Note : SQLite est intégré à Python, aucune installation de base de données externe n'est requise.*
 
 ---
 
-## Installation
+## Installation et Lancement
 
-### 1. Cloner / se placer dans le dossier
-
+### 1. Se placer dans le dossier de l'API
 ```bash
-cd /home/jipei/projects/mirokai-back/api
+cd api
 ```
 
-### 2. Créer l'environnement virtuel
-
+### 2. Créer et activer l'environnement virtuel
 ```bash
+# Création
 python3 -m venv venv
-```
 
-### 3. Activer l'environnement virtuel
-
-```bash
-# Linux / macOS
+# Activation (Linux / macOS)
 source venv/bin/activate
 
-# Windows
+# Activation (Windows)
 venv\Scripts\activate
 ```
 
-> Le prompt doit afficher `(venv)` pour confirmer l'activation.
-
-### 4. Installer les dépendances
-
+### 3. Installer les dépendances
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Configurer les variables d'environnement
-
+### 4. Configurer les variables d'environnement
+Copiez le fichier d'exemple et éditez-le si nécessaire :
 ```bash
 cp .env.example .env
 ```
+*Le fichier `.env` contient les clés secrètes pour JWT et le chemin de la base de données.*
 
-Editer `.env` :
-
-```env
-SECRET_KEY=une-cle-secrete-robuste
-JWT_SECRET_KEY=une-autre-cle-jwt-robuste
-DATABASE_PATH=./mirokai.db
-UPLOAD_FOLDER=./uploads
-MAX_CONTENT_LENGTH=104857600
-```
-
-> `MAX_CONTENT_LENGTH` est en octets. `104857600` = 100 Mo.
-
-### 6. Initialiser la base de données et les données de démo
-
+### 5. Initialiser la base de données
+Cette étape crée les tables et un compte administrateur par défaut :
 ```bash
 python seed.py
 ```
-
-Ce script :
-- Crée toutes les tables SQLite (`mirokai.db`)
-- Crée un admin par défaut
-- Insère un module et une question d'exemple
-
 **Identifiants admin créés :**
+- **Email** : `admin@mirokai.fr`
+- **Mot de passe** : `admin123`
 
+### 6. Lancer le serveur
+```bash
+# Mode développement avec auto-reload
+flask run --port 5000 --debug
 ```
-Email    : admin@mirokai.fr
-Password : admin123
-```
-
-> Changer ce mot de passe en production via `PUT /api/admins/:id`.
+L'API sera accessible sur : `http://localhost:5000`
 
 ---
 
-## Lancer le serveur
+## Endpoints principaux
 
-```bash
-# Mode développement (hot reload)
-flask run --port 5000 --debug
+### Administration (Back-office)
+Toutes les routes admin nécessitent le header : `Authorization: Bearer <token>`
 
-# Ou directement
-python app.py
-```
+- **Auth** : `POST /api/auth/login` (pour obtenir le token)
+- **Modules** : `GET /api/modules/all`, `POST /api/modules`, `PATCH /api/modules/:id/position`
+- **Questions** : `GET /api/modules/:id/questions/all`, `POST /api/questions`
+- **Upload** : `POST /api/upload?folder=images` (images, vidéos, audio)
+- **Settings** : `PUT /api/settings`
 
-L'API est accessible sur : `http://localhost:5000`
+### Visiteurs
+- **Modules** : `GET /api/modules` (liste active), `GET /api/modules/qr/:qr_code`
+- **Quiz** : `GET /api/modules/:id/questions`, `POST /api/quiz/validate`
 
 ---
 
 ## Structure du projet
-
-```
-api/
-├── app.py              # Point d'entrée Flask, config, CORS, blueprints
-├── config.py           # Lecture des variables d'environnement
-├── db.py               # Connexion SQLite, helpers (get_db, generate_id, init_db)
-├── seed.py             # Initialisation BDD + données de démo
-├── schema.sql          # Définition des tables SQL
-├── requirements.txt    # Dépendances Python
-├── .env                # Variables d'environnement (non versionné)
-├── .env.example        # Template des variables d'environnement
-├── mirokai.db          # Base de données SQLite (générée, non versionné)
-│
-├── routes/
-│   ├── auth.py         # /api/auth — login, logout, me
-│   ├── modules.py      # /api/modules — CRUD modules
-│   ├── questions.py    # /api/modules/:id/questions — CRUD questions
-│   ├── quiz.py         # /api/quiz/validate — validation réponse
-│   ├── upload.py       # /api/upload — upload/suppression fichiers locaux
-│   ├── settings.py     # /api/settings — config du parcours
-│   └── admins.py       # /api/admins — CRUD admins
-│
-├── middleware/
-│   └── auth.py         # Décorateur @admin_required (vérification JWT)
-│
-└── uploads/            # Médias uploadés (non versionné)
-    ├── images/
-    ├── videos/
-    └── audioguides/
-```
-
----
-
-## Endpoints
-
-### Auth
-
-| Méthode | Route | Auth | Description |
-|---|---|---|---|
-| POST | `/api/auth/login` | Non | Connexion admin |
-| POST | `/api/auth/logout` | Admin | Déconnexion |
-| GET | `/api/auth/me` | Admin | Profil admin connecté |
-
-### Modules
-
-| Méthode | Route | Auth | Description |
-|---|---|---|---|
-| GET | `/api/modules` | Non | Liste des modules actifs |
-| GET | `/api/modules/all` | Admin | Tous les modules |
-| GET | `/api/modules/:id` | Non | Détail d'un module |
-| GET | `/api/modules/qr/:qr_code` | Non | Module par QR code |
-| POST | `/api/modules` | Admin | Créer un module |
-| PUT | `/api/modules/:id` | Admin | Modifier un module |
-| PATCH | `/api/modules/:id/position` | Admin | Mettre à jour la position |
-| PATCH | `/api/modules/:id/toggle` | Admin | Activer / désactiver |
-| DELETE | `/api/modules/:id` | Admin | Supprimer un module |
-
-### Questions
-
-| Méthode | Route | Auth | Description |
-|---|---|---|---|
-| GET | `/api/modules/:id/questions` | Non | Questions par tranche d'âge |
-| GET | `/api/modules/:id/questions/all` | Admin | Toutes les questions |
-| POST | `/api/questions` | Admin | Créer une question |
-| PUT | `/api/questions/:id` | Admin | Modifier une question |
-| DELETE | `/api/questions/:id` | Admin | Supprimer une question |
-
-### Quiz
-
-| Méthode | Route | Auth | Description |
-|---|---|---|---|
-| POST | `/api/quiz/validate` | Non | Valider une réponse → mot secret |
-
-### Upload
-
-| Méthode | Route | Auth | Description |
-|---|---|---|---|
-| POST | `/api/upload` | Admin | Uploader un fichier |
-| DELETE | `/api/upload` | Admin | Supprimer un fichier |
-
-Les fichiers sont servis via : `GET /uploads/<dossier>/<fichier>`
-
-### Settings
-
-| Méthode | Route | Auth | Description |
-|---|---|---|---|
-| GET | `/api/settings` | Non | Config du parcours |
-| PUT | `/api/settings` | Admin | Modifier la config |
-
-### Admins
-
-| Méthode | Route | Auth | Description |
-|---|---|---|---|
-| GET | `/api/admins` | Admin | Liste des admins |
-| POST | `/api/admins` | Admin | Créer un admin |
-| PUT | `/api/admins/:id` | Admin | Modifier un admin |
-| DELETE | `/api/admins/:id` | Admin | Supprimer un admin |
-
----
-
-## Authentification
-
-Toutes les routes **Admin** nécessitent un header :
-
-```
-Authorization: Bearer <token>
-```
-
-Le token est obtenu via `POST /api/auth/login`.
-
-**Exemple de login :**
-
-```bash
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "admin@mirokai.fr", "password": "admin123"}'
-```
-
-Réponse :
-
-```json
-{
-  "token": "eyJ...",
-  "admin": { "id": "...", "email": "admin@mirokai.fr", "display_name": "Administrateur" }
-}
-```
-
----
-
-## Upload de fichiers
-
-```bash
-curl -X POST http://localhost:5000/api/upload?folder=images \
-  -H "Authorization: Bearer <token>" \
-  -F "file=@/chemin/vers/image.jpg"
-```
-
-Réponse :
-
-```json
-{
-  "url": "/uploads/images/uuid.jpg",
-  "filename": "uuid.jpg"
-}
-```
-
-Types autorisés : `png`, `jpg`, `jpeg`, `gif`, `webp`, `mp4`, `webm`, `mp3`, `wav`, `ogg`, `m4a`
-Taille max : 100 Mo (configurable via `MAX_CONTENT_LENGTH`)
-
----
-
-## Tranches d'âge (quiz)
-
-Les valeurs valides pour `age_group` sont :
-
-```
-5-7 | 8-10 | 11-13 | 14+
-```
-
----
-
-## Dépendances
-
-```
-flask               # Framework web
-flask-cors          # Cross-Origin Resource Sharing
-flask-jwt-extended  # Authentification JWT
-bcrypt              # Hachage des mots de passe
-python-dotenv       # Chargement du fichier .env
-```
+- `app.py` : Point d'entrée et configuration Flask.
+- `routes/` : Blueprints par domaine (auth, modules, questions, etc.).
+- `db.py` & `schema.sql` : Gestion de la base SQLite.
+- `uploads/` : Stockage local des médias.
