@@ -183,6 +183,26 @@ def update_position(module_id):
     conn.close()
     return jsonify(module_to_dict(row)), 200
 
+@modules_bp.route("/positions", methods=["PATCH"])
+@admin_required
+def update_positions_bulk():
+    data = request.get_json()
+    if not isinstance(data, list):
+        return jsonify({"error": "Un tableau de positions est requis"}), 400
+
+    conn = get_db()
+    for item in data:
+        if "id" not in item:
+            continue
+        conn.execute(
+            "UPDATE modules SET position_x = ?, position_y = ?, updated_at = datetime('now') WHERE id = ?",
+            (item.get("position_x", 0.0), item.get("position_y", 0.0), item["id"])
+        )
+    conn.commit()
+    rows = conn.execute("SELECT * FROM modules ORDER BY suggested_order").fetchall()
+    conn.close()
+    return jsonify([module_to_dict(r) for r in rows]), 200
+
 @modules_bp.route("/<string:module_id>/toggle", methods=["PATCH"])
 @admin_required
 def toggle_module(module_id):
