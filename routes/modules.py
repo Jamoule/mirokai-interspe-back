@@ -26,7 +26,7 @@ def module_to_dict(row):
 def list_modules():
     conn = get_db()
     rows = conn.execute(
-        "SELECT * FROM modules WHERE is_active = 1 ORDER BY suggested_order"
+        "SELECT * FROM modules WHERE is_active = 1 ORDER BY suggested_order, number"
     ).fetchall()
     conn.close()
     return jsonify([module_to_dict(r) for r in rows]), 200
@@ -35,7 +35,7 @@ def list_modules():
 @admin_required
 def list_all_modules():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM modules ORDER BY suggested_order").fetchall()
+    rows = conn.execute("SELECT * FROM modules ORDER BY suggested_order, number").fetchall()
     conn.close()
     return jsonify([module_to_dict(r) for r in rows]), 200
 
@@ -45,19 +45,53 @@ def get_by_qr(qr_code):
     row = conn.execute(
         "SELECT * FROM modules WHERE qr_code = ? AND is_active = 1", (qr_code,)
     ).fetchone()
-    conn.close()
+    
     if not row:
+        conn.close()
         return jsonify({"error": "Module introuvable"}), 404
-    return jsonify(module_to_dict(row)), 200
+    
+    module_data = module_to_dict(row)
+    
+    # Find next module ID based on suggested_order and number
+    next_row = conn.execute(
+        """SELECT id FROM modules 
+           WHERE is_active = 1 
+           AND (suggested_order > ? OR (suggested_order = ? AND number > ?))
+           ORDER BY suggested_order ASC, number ASC 
+           LIMIT 1""",
+        (row["suggested_order"], row["suggested_order"], row["number"])
+    ).fetchone()
+    
+    module_data["next_module_id"] = next_row["id"] if next_row else None
+    
+    conn.close()
+    return jsonify(module_data), 200
 
 @modules_bp.route("/<string:module_id>", methods=["GET"])
 def get_module(module_id):
     conn = get_db()
     row = conn.execute("SELECT * FROM modules WHERE id = ?", (module_id,)).fetchone()
-    conn.close()
+    
     if not row:
+        conn.close()
         return jsonify({"error": "Module introuvable"}), 404
-    return jsonify(module_to_dict(row)), 200
+    
+    module_data = module_to_dict(row)
+    
+    # Find next module ID
+    next_row = conn.execute(
+        """SELECT id FROM modules 
+           WHERE is_active = 1 
+           AND (suggested_order > ? OR (suggested_order = ? AND number > ?))
+           ORDER BY suggested_order ASC, number ASC 
+           LIMIT 1""",
+        (row["suggested_order"], row["suggested_order"], row["number"])
+    ).fetchone()
+    
+    module_data["next_module_id"] = next_row["id"] if next_row else None
+    
+    conn.close()
+    return jsonify(module_data), 200
 
 @modules_bp.route("", methods=["POST"])
 @admin_required
