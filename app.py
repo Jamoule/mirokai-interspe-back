@@ -14,8 +14,11 @@ def create_app():
     app.config["MAX_CONTENT_LENGTH"] = config.MAX_CONTENT_LENGTH
     app.config["UPLOAD_FOLDER"] = os.path.abspath(config.UPLOAD_FOLDER)
 
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}},
-         allow_headers=["Authorization", "Content-Type"])
+    CORS(app, resources={r"/api/*": {"origins": [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://mirokai-interspe-front.vercel.app",
+    ]}}, allow_headers=["Authorization", "Content-Type"])
 
     JWTManager(app)
 
@@ -83,4 +86,4 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
