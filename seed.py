@@ -34,7 +34,7 @@ Voix 1 et 2 : On y va""",
     {
         "number": 2,
         "name": "L'histoire des Mirokaï",
-        "media_url": "/uploads/Audioguides/FR/2.L'histoire des Mirokaï.mp4",
+        "media_url": "/uploads/Audioguides/FR/2.L'histoire des Mirokai.mp4",
         "qr_code": "MOD-002",
         "description": """Voix 1 : Tu connais la planète Nimira ?
 
@@ -58,17 +58,9 @@ Voix 2 : Ah ! C'est donc grâce aux enchanteurs qu'ils peuvent aujourd'hui explo
 
 Voix 1 : C'est ça. Et ils reviennent d'ailleurs souvent sur Terre afin de venir en aide aux humains.""",
         "transcript_segments": [
-            {"start": 0,  "end": 2,  "speaker": "Voix 1", "text": "Tu connais la planète Nimira ?"},
-            {"start": 2,  "end": 5,  "speaker": "Voix 2", "text": "Non, qu'est-ce qu'elle a de si spécial ?"},
-            {"start": 5,  "end": 14, "speaker": "Voix 1", "text": "Eh bien là-bas, tout est en parfaite harmonie. La nature et la technologie coexistent grâce au Myrium, une énergie magique née des rêves et de la créativité."},
-            {"start": 14, "end": 18, "speaker": "Voix 2", "text": "Du Myrium ? Ça a l'air incroyable ! Et qui vit sur cette planète ?"},
-            {"start": 18, "end": 33, "speaker": "Voix 1", "text": "Justement, le peuple des Mirokaï. Et parmi eux, deux jumeaux aventuriers : Miroki et Miroka. Ils voyagent partout pour partager le Myrium, toujours curieux et toujours prêts à aider. Mais un jour, alors qu'ils jouaient près d'un portail astral, leur Rune, une pierre remplie de Myrium, a été aspirée par le portail."},
-            {"start": 33, "end": 36, "speaker": "Voix 2", "text": "Oh ! Attends... Et eux ?"},
-            {"start": 36, "end": 42, "speaker": "Voix 1", "text": "Ils ont été entraînés avec elle et se sont retrouvés sur Terre, piégés à l'intérieur de la Rune."},
-            {"start": 42, "end": 47, "speaker": "Voix 2", "text": "Mais c'est triste cette histoire ! Ils ont pu s'échapper de cette Rune, j'espère ?"},
-            {"start": 47, "end": 56, "speaker": "Voix 1", "text": "Oui, heureusement. Des années plus tard, un enchanteur a découvert la Rune. Avec ses amis, il a construit des combinaisons pour permettre aux jumeaux de prendre corps dans ce nouveau monde."},
-            {"start": 56, "end": 60, "speaker": "Voix 2", "text": "Ah ! C'est donc grâce aux enchanteurs qu'ils peuvent aujourd'hui explorer la Terre ?"},
-            {"start": 60, "end": 66, "speaker": "Voix 1", "text": "C'est ça. Et ils reviennent d'ailleurs souvent sur Terre afin de venir en aide aux humains."},
+            {"start": 0, "end": 2, "speaker": "Voix 1", "text": "Tu connais la planète Nimira ?"},
+            {"start": 2, "end": 5, "speaker": "Voix 2", "text": "Non, qu'est-ce qu'elle a de si spécial ?"},
+            {"start": 5, "end": 8, "speaker": "Voix 1", "text": "Eh bien là-bas, tout est en parfaite harmonie. La nature et la technologie coexistent grâce au Myrium, une énergie magique née des rêves et de la créativité."},
         ],
     },
     {
